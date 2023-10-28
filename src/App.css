@@ -59,7 +59,7 @@ input.shake{
 }
 
 
-.container {
+.ctr {
   display: flex;
   flex-direction: row;
 }

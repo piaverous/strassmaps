@@ -1,9 +1,13 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
 import MapGL, { Source, Layer } from "react-map-gl";
-import { useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { declareStations } from "./gameState.js";
-import { getTramLineColor, getTitleCaseStationName } from "./utils";
+import {
+  dynamicSort,
+  getTramLineColor,
+  getTitleCaseStationName,
+} from "./utils";
 
 function TramLine(data, lineLabel) {
   const id = data.properties.ligne;
@@ -27,7 +31,7 @@ function TramLine(data, lineLabel) {
 }
 
 function TramLineStations(data, lineLabel, colored) {
-  const id = `${lineLabel}-stations-names`;
+  const id = `${lineLabel}-stations-names-${colored ? "co" : "bw"}`;
   const coloredStyle = {
     id: `${lineLabel}-stations`,
     type: "circle",
@@ -65,8 +69,15 @@ function TramLineStations(data, lineLabel, colored) {
     },
   };
   const dotStyle = colored ? coloredStyle : bwStyle;
+  const points = {
+    ...data,
+    features: data.features.filter((point) => {
+      const ligne = point.properties.ligne_s;
+      return ligne[ligne.length - 1] === point.properties.label;
+    }),
+  };
   return (
-    <Source type="geojson" data={data} key={id}>
+    <Source type="geojson" data={points} key={id}>
       <Layer {...dotStyle} />
       {colored && <Layer {...titleStyle} />}
     </Source>
@@ -81,6 +92,11 @@ function Map() {
   const [allTramStations, setAllTramStations] = useState(null);
   const [allTramLinesLayer, setAllTramLinesLayer] = useState(null);
   const [allTramStationsLayer, setAllTramStationsLayer] = useState(null);
+  const [foundTramStationsLayer, setFoundTramStationsLayer] = useState(null);
+
+  const foundStationsByLine = useSelector(
+    (state) => state.gameState.foundStationsByLine
+  );
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -99,24 +115,26 @@ function Map() {
       .then((resp) => resp.json())
       .then((json) => {
         const result = {};
-        const allStationNames = [];
-        json.features.forEach((station) => {
-          const lineLabel = station.properties.ligne_s;
+        json.features.forEach((s) => {
+          const lineLabels = s.properties.ligne_s.split("-");
           const titleCaseStationName = getTitleCaseStationName(
-            station.properties.texte
+            s.properties.texte
           );
-          allStationNames.push(titleCaseStationName.toUpperCase());
-          station.properties.titleCaseStationName = titleCaseStationName;
-          if (result.hasOwnProperty(lineLabel)) {
-            result[lineLabel].features.push(station);
-          } else {
-            result[lineLabel] = {
-              type: "FeatureCollection",
-              features: [station],
-            };
-          }
+          s.properties.titleCaseStationName = titleCaseStationName;
+          lineLabels.forEach((label) => {
+            const station = JSON.parse(JSON.stringify(s)); // Required for deepcopy
+            station.properties.label = label;
+            if (result.hasOwnProperty(label)) {
+              result[label].features.push(station);
+            } else {
+              result[label] = {
+                type: "FeatureCollection",
+                features: [station],
+              };
+            }
+          });
         });
-        dispatch(declareStations(allStationNames));
+        dispatch(declareStations(result));
         return result;
       })
       .then((json) => setAllTramStations(json))
@@ -126,7 +144,7 @@ function Map() {
   useEffect(() => {
     if (allTramLines) {
       const layers = [];
-      allTramLines.features.forEach((line) => {
+      allTramLines.features.sort(dynamicSort("ligne")).forEach((line) => {
         const lineLabel = line.properties.ligne;
         layers.push(TramLine(line, lineLabel));
       });
@@ -139,11 +157,25 @@ function Map() {
       const layers = [];
       Object.keys(allTramStations).forEach((lineLabel) => {
         const stations = allTramStations[lineLabel];
-        layers.push(TramLineStations(stations, lineLabel));
+        layers.push(TramLineStations(stations, lineLabel, false));
       });
       setAllTramStationsLayer(layers);
     }
   }, [allTramStations]);
+
+  useEffect(() => {
+    if (foundStationsByLine) {
+      const layers = [];
+      console.log({ foundStationsByLine });
+      Object.keys(foundStationsByLine).forEach((lineLabel) => {
+        const stations = foundStationsByLine[lineLabel];
+        if (stations.features.length > 0) {
+          layers.push(TramLineStations(stations, lineLabel, true));
+        }
+      });
+      setFoundTramStationsLayer(layers);
+    }
+  }, [foundStationsByLine]);
 
   return (
     <MapGL
@@ -158,6 +190,7 @@ function Map() {
     >
       {allTramLinesLayer}
       {allTramStationsLayer}
+      {foundTramStationsLayer}
     </MapGL>
   );
 }
