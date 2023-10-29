@@ -1,7 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 import storage from "redux-persist/lib/storage";
+import { getTitleCaseStationName } from "../utils";
 
 const initialState = {
+  allTramLines: null,
   foundStations: [],
   foundStationsMap: {},
   foundStationsByLine: {
@@ -91,25 +93,54 @@ export const gameState = createSlice({
         state.foundStationsMap[name] = state.foundStationsMap[name].sort();
       });
     },
-    declareStations: (state, action) => {
+    declareTramLines: (state, action) => {
+      state.allTramLines = action.payload;
+    },
+    declareTramStations: (state, action) => {
       // Redux Toolkit allows us to write "mutating" logic in reducers. It
       // doesn't actually mutate the state because it uses the Immer library,
       // which detects changes to a "draft state" and produces a brand new
       // immutable state based off those changes.
       // Also, no return statement is required from these functions.
-      state.existingStationsByLine = action.payload;
-      for (let key in action.payload) {
-        state.existingStations.push(...action.payload[key].features);
+      const result = {};
+      action.payload.features.forEach((s) => {
+        const lineLabels = s.properties.ligne_s.split("-");
+        const titleCaseStationName = getTitleCaseStationName(
+          s.properties.texte
+        );
+        s.properties.titleCaseStationName = titleCaseStationName;
+        lineLabels.forEach((label) => {
+          const station = JSON.parse(JSON.stringify(s)); // Required for deepcopy
+          station.properties.label = label;
+          if (result.hasOwnProperty(label)) {
+            result[label].features.push(station);
+          } else {
+            result[label] = {
+              type: "FeatureCollection",
+              features: [station],
+            };
+          }
+        });
+      });
+      state.existingStationsByLine = result;
+      for (let key in result) {
+        state.existingStations.push(...result[key].features);
       }
     },
     resetGame: (state) => {
       storage.removeItem("persist:root");
-      return initialState;
+      return {
+        ...initialState,
+        existingStations: state.existingStations,
+        existingStationsByLine: state.existingStationsByLine,
+        allTramLines: state.allTramLines,
+      };
     },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { findStation, declareStations, resetGame } = gameState.actions;
+export const { findStation, declareTramLines, declareTramStations, resetGame } =
+  gameState.actions;
 
 export default gameState.reducer;

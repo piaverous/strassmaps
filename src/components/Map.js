@@ -3,12 +3,11 @@ import { useEffect, useState } from "react";
 import MapGL, { Layer, Source } from "react-map-gl";
 import { useDispatch, useSelector } from "react-redux";
 
-import { declareStations } from "../reducers/gameState.js";
 import {
-  dynamicSort,
-  getTitleCaseStationName,
-  getTramLineColor,
-} from "../utils.js";
+  declareTramLines,
+  declareTramStations,
+} from "../reducers/gameState.js";
+import { dynamicSort, getTramLineColor } from "../utils.js";
 
 function TramLine(data, lineLabel) {
   const id = data.properties.ligne;
@@ -88,61 +87,45 @@ function TramLineStations(data, lineLabel, colored) {
 const MAPBOX_TOKEN = process.env.REACT_APP_MAPBOX_TOKEN;
 
 function Map() {
-  const [allTramLines, setAllTramLines] = useState(null);
-  const [allTramStations, setAllTramStations] = useState(null);
   const [allTramLinesLayer, setAllTramLinesLayer] = useState(null);
   const [allTramStationsLayer, setAllTramStationsLayer] = useState(null);
   const [foundTramStationsLayer, setFoundTramStationsLayer] = useState(null);
 
   const foundStationsByLine = useSelector((state) => state.foundStationsByLine);
+  const allTramLines = useSelector((state) => state.allTramLines);
+  const existingStations = useSelector((state) => state.existingStations);
+  const existingStationsByLine = useSelector(
+    (state) => state.existingStationsByLine
+  );
   const dispatch = useDispatch();
 
   useEffect(() => {
-    fetch(
-      "https://data.strasbourg.eu/api/explore/v2.1/catalog/datasets/lignes_tram/exports/geojson"
-    )
-      .then((resp) => resp.json())
-      .then((json) => setAllTramLines(json))
-      .catch((err) => console.error("Could not load tram lines", err));
-  }, []);
+    if (!allTramLines) {
+      fetch(
+        "https://data.strasbourg.eu/api/explore/v2.1/catalog/datasets/lignes_tram/exports/geojson"
+      )
+        .then((resp) => resp.json())
+        .then((json) => dispatch(declareTramLines(json)))
+        .catch((err) => console.error("Could not load tram lines", err));
+    }
+  }, [dispatch, allTramLines]);
 
   useEffect(() => {
-    fetch(
-      "https://data.strasbourg.eu/api/explore/v2.1/catalog/datasets/stations_tram/exports/geojson"
-    )
-      .then((resp) => resp.json())
-      .then((json) => {
-        const result = {};
-        json.features.forEach((s) => {
-          const lineLabels = s.properties.ligne_s.split("-");
-          const titleCaseStationName = getTitleCaseStationName(
-            s.properties.texte
-          );
-          s.properties.titleCaseStationName = titleCaseStationName;
-          lineLabels.forEach((label) => {
-            const station = JSON.parse(JSON.stringify(s)); // Required for deepcopy
-            station.properties.label = label;
-            if (result.hasOwnProperty(label)) {
-              result[label].features.push(station);
-            } else {
-              result[label] = {
-                type: "FeatureCollection",
-                features: [station],
-              };
-            }
-          });
-        });
-        dispatch(declareStations(result));
-        return result;
-      })
-      .then((json) => setAllTramStations(json))
-      .catch((err) => console.error("Could not load tram stations", err));
-  }, [dispatch]);
+    if (existingStations.length === 0) {
+      fetch(
+        "https://data.strasbourg.eu/api/explore/v2.1/catalog/datasets/stations_tram/exports/geojson"
+      )
+        .then((resp) => resp.json())
+        .then((json) => dispatch(declareTramStations(json)))
+        .catch((err) => console.error("Could not load tram stations", err));
+    }
+  }, [dispatch, existingStations]);
 
   useEffect(() => {
     if (allTramLines) {
       const layers = [];
-      allTramLines.features.sort(dynamicSort("ligne")).forEach((line) => {
+      const tramLinesToSort = [...allTramLines.features];
+      tramLinesToSort.sort(dynamicSort("ligne")).forEach((line) => {
         const lineLabel = line.properties.ligne;
         layers.push(TramLine(line, lineLabel));
       });
@@ -151,15 +134,15 @@ function Map() {
   }, [allTramLines]);
 
   useEffect(() => {
-    if (allTramStations) {
+    if (existingStationsByLine) {
       const layers = [];
-      Object.keys(allTramStations).forEach((lineLabel) => {
-        const stations = allTramStations[lineLabel];
+      Object.keys(existingStationsByLine).forEach((lineLabel) => {
+        const stations = existingStationsByLine[lineLabel];
         layers.push(TramLineStations(stations, lineLabel, false));
       });
       setAllTramStationsLayer(layers);
     }
-  }, [allTramStations]);
+  }, [existingStationsByLine]);
 
   useEffect(() => {
     if (foundStationsByLine) {
