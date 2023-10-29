@@ -204,7 +204,7 @@ function App() {
           </div>
         </form>
       </div>
-      <div className="column is-3 is-hidden-mobile">
+      <div className="column is-3 is-hidden-touch">
         <ScoreHeader
           percentFoundTotal={percentFoundTotal}
           percentFoundPerLine={percentFoundPerLine}
