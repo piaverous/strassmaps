@@ -1,0 +1,17 @@
+{
+  "files": {
+    "main.css": "/strassmaps/static/css/main.2a25dcd1.css",
+    "main.js": "/strassmaps/static/js/main.823e1f22.js",
+    "static/js/483.bf27b5d5.chunk.js": "/strassmaps/static/js/483.bf27b5d5.chunk.js",
+    "static/js/787.120ad016.chunk.js": "/strassmaps/static/js/787.120ad016.chunk.js",
+    "index.html": "/strassmaps/index.html",
+    "main.2a25dcd1.css.map": "/strassmaps/static/css/main.2a25dcd1.css.map",
+    "main.823e1f22.js.map": "/strassmaps/static/js/main.823e1f22.js.map",
+    "483.bf27b5d5.chunk.js.map": "/strassmaps/static/js/483.bf27b5d5.chunk.js.map",
+    "787.120ad016.chunk.js.map": "/strassmaps/static/js/787.120ad016.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.2a25dcd1.css",
+    "static/js/main.823e1f22.js"
+  ]
+}
