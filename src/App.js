@@ -168,13 +168,12 @@ function App() {
                   <span
                     className="icon is-small"
                     style={{
+                      color: "#999",
                       transition: "all 0.2s linear",
-                      transform: dropdownActive
-                        ? "rotate(180deg)"
-                        : "rotate(0)",
+                      transform: dropdownActive ? "rotate(90deg)" : "rotate(0)",
                     }}
                   >
-                    <i className="fas fa-angle-down" aria-hidden="true"></i>
+                    <i className="fas fa-ellipsis-v" aria-hidden="true"></i>
                   </span>
                 </span>
               </div>
