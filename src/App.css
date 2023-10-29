@@ -11,6 +11,13 @@
   align-items: center;
 }
 
+.input-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
 
 .floating {
   width: 90%;
@@ -20,13 +27,6 @@
   .floating {
       max-width: 90%;
   }
-}
-
-input.floating {
-  padding: 12px 20px;
-  border-radius: 2rem;
-  border: 1px solid #ddd;
-  box-sizing: border-box;
 }
 
 #found-notification {

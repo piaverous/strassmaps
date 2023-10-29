@@ -1,64 +1,67 @@
 import { createSlice } from "@reduxjs/toolkit";
+import storage from "redux-persist/lib/storage";
+
+const initialState = {
+  foundStations: [],
+  foundStationsMap: {},
+  foundStationsByLine: {
+    A: {
+      type: "FeatureCollection",
+      features: [],
+    },
+    B: {
+      type: "FeatureCollection",
+      features: [],
+    },
+    C: {
+      type: "FeatureCollection",
+      features: [],
+    },
+    D: {
+      type: "FeatureCollection",
+      features: [],
+    },
+    E: {
+      type: "FeatureCollection",
+      features: [],
+    },
+    F: {
+      type: "FeatureCollection",
+      features: [],
+    },
+  },
+  existingStationsByLine: {
+    A: {
+      type: "FeatureCollection",
+      features: [],
+    },
+    B: {
+      type: "FeatureCollection",
+      features: [],
+    },
+    C: {
+      type: "FeatureCollection",
+      features: [],
+    },
+    D: {
+      type: "FeatureCollection",
+      features: [],
+    },
+    E: {
+      type: "FeatureCollection",
+      features: [],
+    },
+    F: {
+      type: "FeatureCollection",
+      features: [],
+    },
+  },
+  existingStations: [],
+};
 
 export const gameState = createSlice({
   name: "gameState",
-  initialState: {
-    foundStations: [],
-    foundStationsMap: {},
-    foundStationsByLine: {
-      A: {
-        type: "FeatureCollection",
-        features: [],
-      },
-      B: {
-        type: "FeatureCollection",
-        features: [],
-      },
-      C: {
-        type: "FeatureCollection",
-        features: [],
-      },
-      D: {
-        type: "FeatureCollection",
-        features: [],
-      },
-      E: {
-        type: "FeatureCollection",
-        features: [],
-      },
-      F: {
-        type: "FeatureCollection",
-        features: [],
-      },
-    },
-    existingStationsByLine: {
-      A: {
-        type: "FeatureCollection",
-        features: [],
-      },
-      B: {
-        type: "FeatureCollection",
-        features: [],
-      },
-      C: {
-        type: "FeatureCollection",
-        features: [],
-      },
-      D: {
-        type: "FeatureCollection",
-        features: [],
-      },
-      E: {
-        type: "FeatureCollection",
-        features: [],
-      },
-      F: {
-        type: "FeatureCollection",
-        features: [],
-      },
-    },
-    existingStations: [],
-  },
+  initialState,
   reducers: {
     findStation: (state, action) => {
       // Redux Toolkit allows us to write "mutating" logic in reducers. It
@@ -99,10 +102,14 @@ export const gameState = createSlice({
         state.existingStations.push(...action.payload[key].features);
       }
     },
+    resetGame: (state) => {
+      storage.removeItem("persist:root");
+      return initialState;
+    },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { findStation, declareStations } = gameState.actions;
+export const { findStation, declareStations, resetGame } = gameState.actions;
 
 export default gameState.reducer;

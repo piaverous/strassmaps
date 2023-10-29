@@ -6,7 +6,7 @@ import "./App.css";
 import Map from "./components/Map.js";
 import ScoreBoard from "./components/ScoreBoard.js";
 import ScoreHeader from "./components/ScoreHeader.js";
-import { findStation } from "./reducers/gameState.js";
+import { findStation, resetGame } from "./reducers/gameState.js";
 import { sanitizeStationName } from "./utils.js";
 
 function getStationIfExists(existingStations, stationName) {
@@ -39,17 +39,21 @@ function wasStationAlreadyFound(foundStationsByLine, stationName) {
 }
 
 function App() {
-  const [stationInput, setStationInput] = useState("");
-  const [shakingInput, setshakingInput] = useState(false);
-  const [percentFoundTotal, setPercentFoundTotal] = useState(0);
-  const [percentFoundPerLine, setPercentFoundPerLine] = useState({
+  const initialPercentPerLine = {
     A: 0,
     B: 0,
     C: 0,
     D: 0,
     E: 0,
     F: 0,
-  });
+  };
+  const [dropdownActive, setDropdownActive] = useState(false);
+  const [stationInput, setStationInput] = useState("");
+  const [shakingInput, setshakingInput] = useState(false);
+  const [percentFoundTotal, setPercentFoundTotal] = useState(0);
+  const [percentFoundPerLine, setPercentFoundPerLine] = useState(
+    initialPercentPerLine
+  );
 
   const [viewNotification, setViewNotification] = useState(false);
 
@@ -85,6 +89,9 @@ function App() {
         setPercentFoundPerLine(percentPerLineBuffer);
         setPercentFoundTotal(newTotal);
       }
+    } else {
+      setPercentFoundPerLine(initialPercentPerLine);
+      setPercentFoundTotal(0);
     }
   }, [
     foundStationsByLine,
@@ -135,14 +142,59 @@ function App() {
               percentFoundPerLine={percentFoundPerLine}
             />
           </div>
-          <input
-            type="text"
-            name="stationInput"
-            placeholder="Station"
-            value={stationInput || ""}
-            onChange={(e) => setStationInput(e.target.value)}
-            className={`floating ${shakingInput ? "shake" : null}`}
-          />
+          <div className="input-container floating">
+            <input
+              type="text"
+              name="stationInput"
+              placeholder="Station"
+              value={stationInput || ""}
+              onChange={(e) => setStationInput(e.target.value)}
+              className={`floating input is-rounded ${
+                shakingInput ? "shake" : null
+              }`}
+            />
+            <div
+              className={`dropdown is-right ${
+                dropdownActive ? "is-active" : ""
+              }`}
+            >
+              <div className="dropdown-trigger">
+                <span
+                  className="button is-rounded"
+                  aria-haspopup="true"
+                  aria-controls="dropdown-menu"
+                  onClick={() => setDropdownActive(!dropdownActive)}
+                >
+                  <span
+                    className="icon is-small"
+                    style={{
+                      transition: "all 0.2s linear",
+                      transform: dropdownActive
+                        ? "rotate(180deg)"
+                        : "rotate(0)",
+                    }}
+                  >
+                    <i className="fas fa-angle-down" aria-hidden="true"></i>
+                  </span>
+                </span>
+              </div>
+              <div className="dropdown-menu" id="dropdown-menu" role="menu">
+                <div className="dropdown-content">
+                  <a
+                    href="#"
+                    className="dropdown-item"
+                    onClick={() => {
+                      dispatch(resetGame());
+                      setDropdownActive(false);
+                    }}
+                  >
+                    Recommencer
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div
             className={`notification is-success has-text-centered ${
               viewNotification ? "shown" : "hidden"
