@@ -1,0 +1,9 @@
+.score-header {
+    position: relative; 
+}
+
+.floating-toggle {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}

@@ -1,13 +1,12 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { getTramLineColor, strNoAccent } from "./utils.js";
-import Map from "./Map.js";
+import { strNoAccent } from "./utils.js";
+import Map from "./components/Map.js";
+import ScoreHeader from "./components/ScoreHeader.js";
+import ScoreBoard from "./components/ScoreBoard.js";
 import "./App.css";
-import { findStation } from "./gameState.js";
-import { getTitleCaseStationName } from "./utils";
-import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
-import "react-circular-progressbar/dist/styles.css";
+import { findStation } from "./reducers/gameState.js";
 
 // problèmes :
 // - accents (alt winmärick, hochschule/Läger)
@@ -16,7 +15,6 @@ import "react-circular-progressbar/dist/styles.css";
 
 function getStationIfExists(existingStations, stationName) {
   console.log({ search: stationName });
-  console.log({ existingStations });
   const result = existingStations.filter(
     (station) =>
       station.properties.texte.replaceAll("-", " ").replaceAll("'", "") ===
@@ -46,25 +44,29 @@ function App() {
   const [stationInput, setStationInput] = useState("");
   const [shakingInput, setshakingInput] = useState(false);
   const [percentFoundTotal, setPercentFoundTotal] = useState(0);
-  const [percentFoundPerLine, setPercentFoundPerLine] = useState({});
+  const [percentFoundPerLine, setPercentFoundPerLine] = useState({
+    A: 0,
+    B: 0,
+    C: 0,
+    D: 0,
+    E: 0,
+    F: 0,
+  });
 
   const [viewNotification, setViewNotification] = useState(false);
 
-  const foundStationsByLine = useSelector(
-    (state) => state.gameState.foundStationsByLine
-  );
-  const existingStations = useSelector(
-    (state) => state.gameState.existingStations
-  );
+  const foundStationsByLine = useSelector((state) => state.foundStationsByLine);
+  const foundStationsMap = useSelector((state) => state.foundStationsMap);
+  const existingStations = useSelector((state) => state.existingStations);
   const existingStationsByLine = useSelector(
-    (state) => state.gameState.existingStationsByLine
+    (state) => state.existingStationsByLine
   );
   const dispatch = useDispatch();
 
   useEffect(() => {
     let totalFound = 0;
     let totalExisting = 0;
-    const percentPerLineBuffer = {};
+    const percentPerLineBuffer = { ...percentFoundPerLine };
 
     Object.keys(existingStationsByLine)
       .sort()
@@ -79,10 +81,13 @@ function App() {
           (amountFound * 100) / existingStationsByLine[key].features.length;
         percentPerLineBuffer[key] = percentFound;
       });
-    setPercentFoundPerLine(percentPerLineBuffer);
-    setPercentFoundTotal(
-      totalExisting > 0 ? (totalFound * 100) / totalExisting : 0
-    );
+    if (totalExisting > 0) {
+      const newTotal = (totalFound * 100) / totalExisting;
+      if (percentFoundTotal !== newTotal) {
+        setPercentFoundPerLine(percentPerLineBuffer);
+        setPercentFoundTotal(newTotal);
+      }
+    }
   }, [
     foundStationsByLine,
     existingStationsByLine,
@@ -124,17 +129,23 @@ function App() {
   }
 
   return (
-    <div className="ctr">
-      <div>
+    <div className="columns is-gapless">
+      <div className="column floating-ancestor">
         <Map />
-        <form className="floating" onSubmit={handleSubmit}>
+        <form className="floating-container" onSubmit={handleSubmit}>
+          <div className="floating box is-hidden-desktop mobile-score-board">
+            <ScoreHeader
+              percentFoundTotal={percentFoundTotal}
+              percentFoundPerLine={percentFoundPerLine}
+            />
+          </div>
           <input
             type="text"
             name="stationInput"
             placeholder="Station"
-            value={stationInput}
+            value={stationInput || ""}
             onChange={(e) => setStationInput(e.target.value)}
-            className={shakingInput ? "shake" : null}
+            className={`floating ${shakingInput ? "shake" : null}`}
           />
           <div
             className={`notification ${viewNotification ? "shown" : "hidden"}`}
@@ -143,56 +154,13 @@ function App() {
           </div>
         </form>
       </div>
-      <div className="container p-4">
-        <p>
-          <span className="is-size-4">
-            {percentFoundTotal % 1 === 0
-              ? percentFoundTotal
-              : percentFoundTotal.toPrecision(2)}{" "}
-            %
-          </span>{" "}
-          des stations de tram trouvées
-        </p>
-        <progress class="progress" value={percentFoundTotal} max="100">
-          {percentFoundTotal}%
-        </progress>
-        <div className="tile is-ancestor">
-          <div className="tile is-parent ">
-            {Object.keys(percentFoundPerLine).map((lineLabel) => {
-              const percentFound = percentFoundPerLine[lineLabel];
-              const color = getTramLineColor(lineLabel);
-              return (
-                <div className="tile is-child p-1 has-text-weight-bold	">
-                  <CircularProgressbar
-                    value={percentFound}
-                    text={lineLabel}
-                    background
-                    styles={buildStyles({
-                      textSize: "1.8rem",
-                      textColor: "#fff",
-                      pathColor: "#fff",
-                      trailColor: color,
-                      backgroundColor: color,
-                    })}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        </div>
+      <div className="column is-3 is-hidden-mobile">
+        <ScoreHeader
+          percentFoundTotal={percentFoundTotal}
+          percentFoundPerLine={percentFoundPerLine}
+        />
         <hr />
-        {Object.keys(foundStationsByLine)
-          .sort()
-          .map((key) => (
-            <div className="content">
-              <h3>{key}</h3>
-              <ul>
-                {foundStationsByLine[key].features.map((station) => (
-                  <li>{getTitleCaseStationName(station.properties.texte)}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
+        <ScoreBoard foundStationsMap={foundStationsMap} />
       </div>
     </div>
   );

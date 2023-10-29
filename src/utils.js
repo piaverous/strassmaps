@@ -8,12 +8,7 @@ const tramColors = {
 };
 
 export function getTramLineColor(lineLabel) {
-  let label = lineLabel;
-  if (lineLabel.length > 1) {
-    // if tram station is on multiple lines, label looks like A-B-C. We take the last one in alphabetical order.
-    label = lineLabel.split("").sort()[lineLabel.length - 1];
-  }
-  if (tramColors.hasOwnProperty(label)) return tramColors[label];
+  if (tramColors.hasOwnProperty(lineLabel)) return tramColors[lineLabel];
   else {
     return "#888";
   }

@@ -4,6 +4,7 @@ export const gameState = createSlice({
   name: "gameState",
   initialState: {
     foundStations: [],
+    foundStationsMap: {},
     foundStationsByLine: {
       A: {
         type: "FeatureCollection",
@@ -67,18 +68,24 @@ export const gameState = createSlice({
       // Also, no return statement is required from these functions.
       action.payload.forEach((station) => {
         const label = station.properties.label;
+        const name = station.properties.texte;
         state.foundStations.push(station);
-        console.log({ station, label });
         if (
           !state.foundStationsByLine[label].features.some(
-            (s) =>
-              s.properties.label === label &&
-              s.properties.texte === station.properties.texte
+            (s) => s.properties.label === label && s.properties.texte === name
           )
         ) {
-          console.log("adding next");
           state.foundStationsByLine[label].features.push(station);
         }
+
+        if (state.foundStationsMap.hasOwnProperty(name)) {
+          if (!state.foundStationsMap[name].includes(label)) {
+            state.foundStationsMap[name].push(label);
+          }
+        } else {
+          state.foundStationsMap[name] = [label];
+        }
+        state.foundStationsMap[name] = state.foundStationsMap[name].sort();
       });
     },
     declareStations: (state, action) => {

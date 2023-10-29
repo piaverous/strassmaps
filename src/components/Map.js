@@ -2,12 +2,12 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import MapGL, { Source, Layer } from "react-map-gl";
 import { useSelector, useDispatch } from "react-redux";
-import { declareStations } from "./gameState.js";
+import { declareStations } from "../reducers/gameState.js";
 import {
   dynamicSort,
   getTramLineColor,
   getTitleCaseStationName,
-} from "./utils";
+} from "../utils.js";
 
 function TramLine(data, lineLabel) {
   const id = data.properties.ligne;
@@ -94,9 +94,7 @@ function Map() {
   const [allTramStationsLayer, setAllTramStationsLayer] = useState(null);
   const [foundTramStationsLayer, setFoundTramStationsLayer] = useState(null);
 
-  const foundStationsByLine = useSelector(
-    (state) => state.gameState.foundStationsByLine
-  );
+  const foundStationsByLine = useSelector((state) => state.foundStationsByLine);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -166,7 +164,6 @@ function Map() {
   useEffect(() => {
     if (foundStationsByLine) {
       const layers = [];
-      console.log({ foundStationsByLine });
       Object.keys(foundStationsByLine).forEach((lineLabel) => {
         const stations = foundStationsByLine[lineLabel];
         if (stations.features.length > 0) {
@@ -184,7 +181,7 @@ function Map() {
         longitude: 7.751,
         zoom: 11.5,
       }}
-      style={{ width: "75vw", height: "100vh" }}
+      style={{ width: "100%", height: "100vh" }}
       mapStyle="mapbox://styles/piaverous/clo8vhi9700yt01r2cimt0fcj"
       mapboxAccessToken={MAPBOX_TOKEN}
     >
