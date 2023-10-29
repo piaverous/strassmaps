@@ -8,14 +8,31 @@ import CTSLogo from "./CTSLogo";
 const ScoreHeader = ({ percentFoundTotal, percentFoundPerLine }) => {
   const [folded, setFolded] = useState(false);
 
+  const FoldingButton = () => (
+    <span
+      className="button is-small floating-toggle"
+      onClick={() => setFolded(!folded)}
+    >
+      <span
+        className="icon"
+        style={{
+          transition: "all 0.2s linear",
+          transform: folded ? "rotate(180deg)" : "rotate(0)",
+        }}
+      >
+        <i className="fas fa-chevron-up" />
+      </span>
+    </span>
+  );
+
   return (
     <div className="p-3">
       <div className="score-header">
         {folded ? (
-          <div>
+          <>
             <p className="content">
               <span className="icon">
-                <CTSLogo/>
+                <CTSLogo />
               </span>
               <span className="ml-3 is-size-5">
                 {percentFoundTotal % 1 === 0
@@ -24,9 +41,9 @@ const ScoreHeader = ({ percentFoundTotal, percentFoundPerLine }) => {
                 %
               </span>
             </p>
-          </div>
+          </>
         ) : (
-          <div>
+          <>
             <p className="content">
               <span className="is-size-4">
                 {percentFoundTotal % 1 === 0
@@ -64,22 +81,9 @@ const ScoreHeader = ({ percentFoundTotal, percentFoundPerLine }) => {
                 );
               })}
             </div>
-          </div>
+          </>
         )}
-        <span
-          className="button is-small floating-toggle"
-          onClick={() => setFolded(!folded)}
-        >
-          <span
-            className="icon"
-            style={{
-              transition: "all 0.2s linear",
-              transform: folded ? "rotate(180deg)" : "rotate(0)",
-            }}
-          >
-            <i className="fas fa-chevron-up" />
-          </span>
-        </span>
+        <FoldingButton />
       </div>
     </div>
   );

@@ -1,24 +1,19 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { strNoAccent } from "./utils.js";
+import { sanitizeStationName } from "./utils.js";
 import Map from "./components/Map.js";
 import ScoreHeader from "./components/ScoreHeader.js";
 import ScoreBoard from "./components/ScoreBoard.js";
 import "./App.css";
 import { findStation } from "./reducers/gameState.js";
 
-// problèmes :
-// - accents (alt winmärick, hochschule/Läger)
-// - espaces (le galet)
-// - apostrophes peu flexibles
-
 function getStationIfExists(existingStations, stationName) {
   console.log({ search: stationName });
   const result = existingStations.filter(
     (station) =>
-      station.properties.texte.replaceAll("-", " ").replaceAll("'", "") ===
-      stationName
+      sanitizeStationName(station.properties.texte) ===
+      sanitizeStationName(stationName)
   );
   if (result.length > 0) {
     return result;
@@ -32,7 +27,9 @@ function wasStationAlreadyFound(foundStationsByLine, stationName) {
     allFoundStations.push(...foundStationsByLine[key].features);
   }
   const result = allFoundStations.filter(
-    (station) => station.properties.texte === stationName
+    (station) =>
+      sanitizeStationName(station.properties.texte) ===
+      sanitizeStationName(stationName)
   );
   if (result.length > 0) {
     return true;
@@ -101,9 +98,7 @@ function App() {
     const results = {};
     const formData = new FormData(e.target);
 
-    formData.forEach(
-      (value, key) => (results[key] = strNoAccent(value).toUpperCase())
-    );
+    formData.forEach((value, key) => (results[key] = value));
 
     if (wasStationAlreadyFound(foundStationsByLine, results.stationInput)) {
       console.log("ALREADY FOUND STATION " + results.stationInput);

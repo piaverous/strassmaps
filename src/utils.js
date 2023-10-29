@@ -7,14 +7,10 @@ const tramColors = {
   F: "#9EBF43",
 };
 
-export function getTramLineColor(lineLabel) {
-  if (tramColors.hasOwnProperty(lineLabel)) return tramColors[lineLabel];
-  else {
-    return "#888";
-  }
-}
+export const getTramLineColor = (lineLabel) =>
+  tramColors.hasOwnProperty(lineLabel) ? tramColors[lineLabel] : "#888";
 
-export function getTitleCaseStationName(stationName) {
+export const getTitleCaseStationName = (stationName) => {
   let name = stationName
     .trim()
     .split(/\s+/)
@@ -26,7 +22,16 @@ export function getTitleCaseStationName(stationName) {
     )
     .join(" ");
   return name;
-}
+};
+
+export const sanitizeStationName = (stationName) =>
+  strNoAccent(
+    stationName
+      .replaceAll("-", "")
+      .replaceAll("'", "")
+      .replaceAll("/", "")
+      .replaceAll(" ", "")
+  ).toUpperCase();
 
 export function strNoAccent(s) {
   var n = "",
