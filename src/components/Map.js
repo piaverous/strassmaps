@@ -84,8 +84,8 @@ function TramLineStations(data, lineLabel, colored) {
   );
 }
 
-const MAPBOX_TOKEN =
-  "pk.eyJ1IjoicGlhdmVyb3VzIiwiYSI6ImNsb2Jrb3ZmMDA4YWMyanFyc3o3cnBuZ20ifQ.Vr3M3Bnv0O--GhKjPK6TfQ";
+const MAPBOX_TOKEN = process.env.REACT_APP_MAPBOX_TOKEN;
+console.log({MAPBOX_TOKEN})
 
 function Map() {
   const [allTramLines, setAllTramLines] = useState(null);

@@ -2,7 +2,7 @@
   "name": "strassmaps",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://piaverous.github.io/strassmaps",
+  "homepage": "https://strassmaps.pivrous.fr",
   "dependencies": {
     "@reduxjs/toolkit": "^1.9.7",
     "@testing-library/jest-dom": "^5.17.0",
