@@ -25,13 +25,9 @@ export const getTitleCaseStationName = (stationName) => {
 };
 
 export const sanitizeStationName = (stationName) =>
-  strNoAccent(
-    stationName
-      .replaceAll("-", "")
-      .replaceAll("'", "")
-      .replaceAll("/", "")
-      .replaceAll(" ", "")
-  ).toUpperCase();
+  strNoAccent(stationName)
+    .toUpperCase()
+    .replace(/[\W_]+/g, "");
 
 export function strNoAccent(s) {
   var n = "",
