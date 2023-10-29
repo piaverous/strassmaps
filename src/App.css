@@ -29,22 +29,12 @@ input.floating {
   box-sizing: border-box;
 }
 
-.notification {
+#found-notification {
   position: relative;
   animation: fadeIn 0.5s;
-  left: 25%;
   top: 0.2rem;
 
-  background-color: #B4F5CC;
-  border-radius: 0.5rem;
-
-  padding: 0.5rem 0;
-  width: 50%;
-
-  text-align: center;
-  color: #185A31;
-  font-size: 0.8rem;
-  font-weight: bold;
+  padding: 0.8rem 1rem;
 }
 
 .shown {

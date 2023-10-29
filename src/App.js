@@ -1,12 +1,13 @@
 import * as React from "react";
-import { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { sanitizeStationName } from "./utils.js";
-import Map from "./components/Map.js";
-import ScoreHeader from "./components/ScoreHeader.js";
-import ScoreBoard from "./components/ScoreBoard.js";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+
 import "./App.css";
+import Map from "./components/Map.js";
+import ScoreBoard from "./components/ScoreBoard.js";
+import ScoreHeader from "./components/ScoreHeader.js";
 import { findStation } from "./reducers/gameState.js";
+import { sanitizeStationName } from "./utils.js";
 
 function getStationIfExists(existingStations, stationName) {
   console.log({ search: stationName });
@@ -143,9 +144,12 @@ function App() {
             className={`floating ${shakingInput ? "shake" : null}`}
           />
           <div
-            className={`notification ${viewNotification ? "shown" : "hidden"}`}
+            className={`notification is-success has-text-centered ${
+              viewNotification ? "shown" : "hidden"
+            }`}
+            id="found-notification"
           >
-            <span>Déjà trouvé !</span>
+            Déjà trouvé !
           </div>
         </form>
       </div>
