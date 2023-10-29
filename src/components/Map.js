@@ -1,12 +1,13 @@
 import * as React from "react";
-import { useState, useEffect } from "react";
-import MapGL, { Source, Layer } from "react-map-gl";
-import { useSelector, useDispatch } from "react-redux";
+import { useEffect, useState } from "react";
+import MapGL, { Layer, Source } from "react-map-gl";
+import { useDispatch, useSelector } from "react-redux";
+
 import { declareStations } from "../reducers/gameState.js";
 import {
   dynamicSort,
-  getTramLineColor,
   getTitleCaseStationName,
+  getTramLineColor,
 } from "../utils.js";
 
 function TramLine(data, lineLabel) {
@@ -85,7 +86,6 @@ function TramLineStations(data, lineLabel, colored) {
 }
 
 const MAPBOX_TOKEN = process.env.REACT_APP_MAPBOX_TOKEN;
-console.log({MAPBOX_TOKEN})
 
 function Map() {
   const [allTramLines, setAllTramLines] = useState(null);
